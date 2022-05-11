@@ -1,36 +1,31 @@
-// finally
-import fetch from "node-fetch";
+const promisify = (item, delay) =>
+  new Promise((resolve) =>
+    setTimeout(() =>
+      resolve(item), delay));
 
-const urls = [
-    'https://jsonplaceholder.typicode.com/users',
-    'https://jsonplaceholder.typicode.com/posts',
-    'https://jsonplaceholder.typicode.com/comments'
-]
+const a = () => promisify('a', 100);
+const b = () => promisify('b', 5000);
+const c = () => promisify('c', 3000);
 
-// Promise.all(urls.map(url => {
-//     return fetch(url).then(people => people.json());
-// })).then(array => {
-//     throw Error;
-//     console.log(array);
-// })
-// .catch(err => console.log(err))
-// .finally(()=> console.log("ahaha"));
-
-
-//for await of
-// instead of await chaining
-const loopThroughUrls = urls => {
-    for(let url of urls){
-        console.log(url)
-    }
+async function parallel() {
+  const promises = [b(), a(), c()];
+  const [output1, output2, output3] = await Promise.all(promises);
+  return `prallel is done: ${output1} ${output2} ${output3}`
 }
 
-const getData2 = async function(urls) {
-    const arrayOfPromises = urls.map(url => fetch(url));
-    for await (let request of arrayOfPromises){
-        const data = await request.json();
-        console.log(data);
-    }
-} 
+async function race() {
+  const promises = [c(), a(), b()];
+  const output1 = await Promise.race(promises);
+  return `race is done: ${output1}`;
+}
 
-getData2(urls);
+async function sequence() {
+  const output1 = await a();
+  const output2 = await c();
+  const output3 = await b();
+  return `sequence is done ${output1} ${output2} ${output3}`
+}
+
+sequence().then(console.log)
+parallel().then(console.log)
+race().then(console.log)
