@@ -1,31 +1,17 @@
-const promisify = (item, delay) =>
-  new Promise((resolve) =>
-    setTimeout(() =>
-      resolve(item), delay));
+const {get,request} = require('https');
+// use https is the same but for sending request to 
+// server with https security
+// get method is the request method that automatically end
+// request
+const req = get('https://www.google.com',(res) => {
+  res.on('data',(chunk)=> {
+      console.log(`Data chunk is ${chunk}`)
+  });
+// chunk is a piece of data, not the whole respond
+  res.on('end',()=> {
+    console.log('No more data');
+  });
+});
 
-const a = () => promisify('a', 100);
-const b = () => promisify('b', 5000);
-const c = () => promisify('c', 3000);
-
-async function parallel() {
-  const promises = [b(), a(), c()];
-  const [output1, output2, output3] = await Promise.all(promises);
-  return `prallel is done: ${output1} ${output2} ${output3}`
-}
-
-async function race() {
-  const promises = [c(), a(), b()];
-  const output1 = await Promise.race(promises);
-  return `race is done: ${output1}`;
-}
-
-async function sequence() {
-  const output1 = await a();
-  const output2 = await c();
-  const output3 = await b();
-  return `sequence is done ${output1} ${output2} ${output3}`
-}
-
-sequence().then(console.log)
-parallel().then(console.log)
-race().then(console.log)
+// req.end();
+// using get we don't need to use end method of request
